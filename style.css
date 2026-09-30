@@ -17,27 +17,73 @@
 
 html,
 body {
-    min-height: 100%;
-}
-
-body {
     background:
         radial-gradient(
-            circle at 50% 45%,
-            rgba(63, 86, 125, 0.18),
-            transparent 34%
+            circle at 50% 42%,
+            rgba(85, 115, 165, 0.16),
+            transparent 30%
         ),
         radial-gradient(
-            circle at 85% 10%,
-            rgba(47, 65, 105, 0.10),
+            circle at 20% 75%,
+            rgba(45, 65, 100, 0.10),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(70, 90, 130, 0.08),
             transparent 28%
         ),
-        var(--bg);
+        #08090c;
 
     color: var(--text);
     font-family: 'Inter', sans-serif;
 
     overflow-x: hidden;
+
+    position: relative;
+}
+
+/* slow moving atmosphere */
+
+body::after {
+    content: "";
+
+    position: fixed;
+    inset: -20%;
+
+    background:
+        radial-gradient(
+            circle at 30% 40%,
+            rgba(110, 145, 210, 0.08),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 70% 60%,
+            rgba(80, 110, 170, 0.06),
+            transparent 28%
+        );
+
+    filter: blur(45px);
+
+    animation: atmosphere 18s ease-in-out infinite alternate;
+
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes atmosphere {
+
+    0% {
+        transform: translate3d(-2%, -1%, 0) scale(1);
+    }
+
+    50% {
+        transform: translate3d(2%, 1%, 0) scale(1.04);
+    }
+
+    100% {
+        transform: translate3d(-1%, 2%, 0) scale(1.02);
+    }
 }
 
 
