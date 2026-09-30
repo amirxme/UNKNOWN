@@ -6,11 +6,22 @@ const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
 
-    if (req.method !== "POST") {
-        return res.status(405).json({
-            error: "Method not allowed"
-        });
-    }
+    if (req.method === "GET") {
+
+    const count =
+        Number(await redis.get("unknown:count")) || 0;
+
+    return res.status(200).json({
+        success: true,
+        count
+    });
+}
+
+if (req.method !== "POST") {
+    return res.status(405).json({
+        error: "Method not allowed"
+    });
+}
 
     try {
 
