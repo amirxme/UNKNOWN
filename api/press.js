@@ -3,28 +3,20 @@ import { Redis } from "@upstash/redis";
 const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
-
-    if (req.method !== "POST") {
-        return res.status(405).json({
-            error: "Method not allowed"
-        });
-    }
-
     try {
-
-        const count = await redis.incr("unknown:count");
+        const test = await redis.incr("unknown:test");
 
         return res.status(200).json({
             success: true,
-            count
+            redis: true,
+            test
         });
 
     } catch (error) {
-
         return res.status(500).json({
             success: false,
-            error: "Database error"
+            redis: false,
+            error: error.message
         });
-
     }
 }
