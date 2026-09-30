@@ -49,14 +49,69 @@ let counterAnimationFrame = null;
 
 function updateCounter(animate = false) {
 
+    const targetCount = count;
+
+if (counterAnimationFrame) {
+    cancelAnimationFrame(counterAnimationFrame);
+    counterAnimationFrame = null;
+}
+
+if (!animate) {
+
     currentCount.textContent =
-        count.toLocaleString("en-US");
+        targetCount.toLocaleString("en-US");
 
-    const progress =
-        Math.min((count / TARGET) * 100, 100);
+} else {
 
-    progressFill.style.width =
-        `${progress}%`;
+    const currentValue =
+        Number(
+            currentCount.textContent.replace(/,/g, "")
+        ) || 0;
+
+    const startTime = performance.now();
+    const duration = 400;
+
+    function animateCount(now) {
+
+        const progress = Math.min(
+            (now - startTime) / duration,
+            1
+        );
+
+        const eased =
+            1 - Math.pow(1 - progress, 3);
+
+        const value = Math.round(
+            currentValue +
+            (targetCount - currentValue) * eased
+        );
+
+        currentCount.textContent =
+            value.toLocaleString("en-US");
+
+        if (progress < 1) {
+
+            counterAnimationFrame =
+                requestAnimationFrame(animateCount);
+
+        } else {
+
+            counterAnimationFrame = null;
+        }
+    }
+
+    counterAnimationFrame =
+        requestAnimationFrame(animateCount);
+}
+
+const progress =
+    Math.min(
+        (targetCount / TARGET) * 100,
+        100
+    );
+
+progressFill.style.width =
+    `${progress}%`;
 }
 
 
