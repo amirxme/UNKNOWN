@@ -790,61 +790,137 @@ function finishExperiment() {
 
 /* LEADERBOARD */
 
-const leaderboardData = [
-    ["7xK...92F", 37],
-    ["A91...K2Q", 31],
-    ["4Pm...8Ls", 24],
-    ["9Qw...L7A", 19],
-    ["3Hd...P2M", 15]
-];
-
-
-function renderLeaderboard() {
+async function renderLeaderboard() {
 
     const list =
         document.getElementById(
             "leaderboardList"
         );
 
-    list.innerHTML = "";
+    list.innerHTML = `
+        <div style="
+            padding:20px 0;
+            color:#555b65;
+            font-size:10px;
+        ">
+            LOADING HOLDERS...
+        </div>
+    `;
 
-    leaderboardData.forEach(
-        (entry, index) => {
+    try {
 
-            const row =
-                document.createElement("div");
+        const response =
+            await fetch("/api/holders");
 
-            row.style.display = "grid";
+        const data =
+            await response.json();
 
-            row.style.gridTemplateColumns =
-                "35px 1fr 60px";
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                "Failed to load holders"
+            );
+        }
 
-            row.style.padding =
-                "14px 0";
+        if (
+            !data.launched ||
+            !Array.isArray(data.holders) ||
+            data.holders.length === 0
+        ) {
 
-            row.style.borderBottom =
-                "1px solid rgba(255,255,255,0.06)";
-
-            row.style.fontSize =
-                "11px";
-
-            row.innerHTML = `
-                <span style="color:#555b65">
-                    ${String(index + 1).padStart(2, "0")}
-                </span>
-
-                <span>
-                    ${entry[0]}
-                </span>
-
-                <span style="text-align:right">
-                    ${entry[1]}
-                </span>
+            list.innerHTML = `
+                <div style="
+                    padding:35px 0;
+                    text-align:center;
+                    color:#555b65;
+                    font-size:10px;
+                    letter-spacing:.14em;
+                ">
+                    HOLDERS
+                    <br><br>
+                    COMING SOON
+                </div>
             `;
 
-            list.appendChild(row);
+            return;
         }
-    );
+
+        list.innerHTML = "";
+
+        data.holders.forEach(
+            (holder, index) => {
+
+                const row =
+                    document.createElement("div");
+
+                row.style.display = "grid";
+
+                row.style.gridTemplateColumns =
+                    "35px 1fr 90px";
+
+                row.style.padding =
+                    "14px 0";
+
+                row.style.borderBottom =
+                    "1px solid rgba(255,255,255,0.06)";
+
+                row.style.fontSize = "11px";
+
+                const amount =
+                    Number(holder.amount) /
+                    Math.pow(
+                        10,
+                        Number(holder.decimals || 0)
+                    );
+
+                row.innerHTML = `
+                    <span style="color:#555b65">
+                        ${String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <span>
+                        ${shortenAddress(
+                            holder.address
+                        )}
+                    </span>
+
+                    <span style="
+                        text-align:right;
+                        color:#777d88;
+                    ">
+                        ${amount.toLocaleString(
+                            "en-US",
+                            {
+                                maximumFractionDigits: 2
+                            }
+                        )}
+                    </span>
+                `;
+
+                list.appendChild(row);
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Holder leaderboard error:",
+            error
+        );
+
+        list.innerHTML = `
+            <div style="
+                padding:25px 0;
+                text-align:center;
+                color:#777d88;
+                font-size:10px;
+            ">
+                HOLDERS UNAVAILABLE
+            </div>
+        `;
+    }
 }
 
 
