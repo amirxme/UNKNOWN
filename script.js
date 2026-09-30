@@ -75,7 +75,9 @@ function buttonPulse() {
     pressButton.classList.add("pulse");
 
     setTimeout(() => {
+
         pressButton.classList.remove("pulse");
+
     }, 450);
 }
 
@@ -104,10 +106,13 @@ function addActivity() {
     const item =
         document.createElement("div");
 
-    item.className = "activity-empty";
+    item.className =
+        "activity-empty";
 
     item.style.opacity = "0";
-    item.style.transform = "translateY(-6px)";
+
+    item.style.transform =
+        "translateY(-6px)";
 
     item.textContent =
         `${wallet} pressed`;
@@ -120,10 +125,14 @@ function addActivity() {
             "opacity .35s ease, transform .35s ease";
 
         item.style.opacity = "1";
-        item.style.transform = "translateY(0)";
+
+        item.style.transform =
+            "translateY(0)";
     });
 
-    while (activityList.children.length > 3) {
+    while (
+        activityList.children.length > 3
+    ) {
 
         activityList.removeChild(
             activityList.lastChild
@@ -144,7 +153,8 @@ function generateWallet() {
         result +=
             chars[
                 Math.floor(
-                    Math.random() * chars.length
+                    Math.random() *
+                    chars.length
                 )
             ];
     }
@@ -156,7 +166,8 @@ function generateWallet() {
         result +=
             chars[
                 Math.floor(
-                    Math.random() * chars.length
+                    Math.random() *
+                    chars.length
                 )
             ];
     }
@@ -248,11 +259,13 @@ function finishExperiment() {
 /* LEADERBOARD */
 
 const leaderboardData = [
+
     ["7xK...92F", 37],
     ["A91...K2Q", 31],
     ["4Pm...8Ls", 24],
     ["9Qw...L7A", 19],
     ["3Hd...P2M", 15]
+
 ];
 
 
@@ -282,7 +295,8 @@ function renderLeaderboard() {
             row.style.borderBottom =
                 "1px solid rgba(255,255,255,0.06)";
 
-            row.style.fontSize = "11px";
+            row.style.fontSize =
+                "11px";
 
             row.innerHTML = `
 
@@ -301,6 +315,7 @@ function renderLeaderboard() {
             `;
 
             list.appendChild(row);
+
         }
     );
 }
@@ -392,7 +407,7 @@ walletOverlay.addEventListener(
 );
 
 
-/* DEVICE */
+/* MOBILE */
 
 function isMobile() {
 
@@ -426,28 +441,58 @@ function getPhantom() {
 }
 
 
-/*
-    MOBILE PHANTOM REDIRECT
+/* SOLFLARE */
 
-    Opens UNKNOWN inside Phantom.
-*/
+function getSolflare() {
 
-function openInPhantom() {
+    if (
+        window.solflare &&
+        typeof window.solflare.connect === "function"
+    ) {
 
-    const currentUrl =
-        window.location.href;
+        return window.solflare;
+    }
 
-    const encodedUrl =
-        encodeURIComponent(currentUrl);
+    return null;
+}
 
-    const phantomUrl =
-        `https://phantom.app/ul/browse/${encodedUrl}`;
+
+/* BACKPACK */
+
+function getBackpack() {
+
+    if (
+        window.backpack &&
+        window.backpack.solana
+    ) {
+
+        return window.backpack.solana;
+    }
+
+    return null;
+}
+
+
+/* MOBILE REDIRECT BUTTON */
+
+function showOpenButton(
+    walletName,
+    deeplink
+) {
 
     walletStatus.innerHTML = `
-        <button
-            id="openPhantomButton"
+        <div
             style="
-                margin-top:8px;
+                margin-bottom:12px;
+                color:#777d88;
+            "
+        >
+            OPEN THIS SITE INSIDE ${walletName}
+        </div>
+
+        <button
+            id="openWalletButton"
+            style="
                 width:100%;
                 padding:14px;
                 border:1px solid rgba(155,188,255,0.30);
@@ -459,22 +504,98 @@ function openInPhantom() {
                 cursor:pointer;
             "
         >
-            OPEN IN PHANTOM
+            OPEN IN ${walletName}
         </button>
     `;
 
-    const button =
+    const openButton =
         document.getElementById(
-            "openPhantomButton"
+            "openWalletButton"
         );
 
-    button.addEventListener(
+    openButton.addEventListener(
         "click",
         () => {
 
             window.location.href =
-                phantomUrl;
+                deeplink;
         }
+    );
+}
+
+
+/* PHANTOM REDIRECT */
+
+function openPhantom() {
+
+    const currentUrl =
+        window.location.href;
+
+    const encodedUrl =
+        encodeURIComponent(
+            currentUrl
+        );
+
+    const deeplink =
+        `https://phantom.app/ul/browse/${encodedUrl}`;
+
+    showOpenButton(
+        "PHANTOM",
+        deeplink
+    );
+}
+
+
+/* SOLFLARE REDIRECT */
+
+function openSolflare() {
+
+    const currentUrl =
+        window.location.href;
+
+    const encodedUrl =
+        encodeURIComponent(
+            currentUrl
+        );
+
+    const ref =
+        encodeURIComponent(
+            window.location.origin
+        );
+
+    const deeplink =
+        `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=${ref}`;
+
+    showOpenButton(
+        "SOLFLARE",
+        deeplink
+    );
+}
+
+
+/* BACKPACK REDIRECT */
+
+function openBackpack() {
+
+    const currentUrl =
+        window.location.href;
+
+    const encodedUrl =
+        encodeURIComponent(
+            currentUrl
+        );
+
+    const ref =
+        encodeURIComponent(
+            window.location.origin
+        );
+
+    const deeplink =
+        `https://backpack.app/ul/v1/browse/${encodedUrl}?ref=${ref}`;
+
+    showOpenButton(
+        "BACKPACK",
+        deeplink
     );
 }
 
@@ -487,13 +608,6 @@ async function connectPhantom() {
         getPhantom();
 
 
-    /*
-        MOBILE EXTERNAL BROWSER
-
-        No injected Phantom provider means
-        Safari/Chrome is outside Phantom.
-    */
-
     if (!provider && isMobile()) {
 
         walletStatus.textContent =
@@ -501,17 +615,13 @@ async function connectPhantom() {
 
         setTimeout(() => {
 
-            openInPhantom();
+            openPhantom();
 
-        }, 350);
+        }, 300);
 
         return;
     }
 
-
-    /*
-        DESKTOP
-    */
 
     if (!provider) {
 
@@ -519,8 +629,8 @@ async function connectPhantom() {
             PHANTOM EXTENSION NOT FOUND
             <br><br>
             <span style="font-size:9px;">
-                Install Phantom and open this site
-                in a supported browser.
+                Open UNKNOWN in a supported desktop browser
+                with Phantom installed.
             </span>
         `;
 
@@ -589,33 +699,33 @@ async function connectPhantom() {
 }
 
 
-/* SOLFLARE */
-
-function getSolflare() {
-
-    if (
-        window.solflare &&
-        typeof window.solflare.connect === "function"
-    ) {
-
-        return window.solflare;
-    }
-
-    return null;
-}
-
+/* SOLFLARE CONNECTION */
 
 async function connectSolflare() {
 
     const provider =
         getSolflare();
 
+
+    if (!provider && isMobile()) {
+
+        walletStatus.textContent =
+            "OPENING SOLFLARE...";
+
+        setTimeout(() => {
+
+            openSolflare();
+
+        }, 300);
+
+        return;
+    }
+
+
     if (!provider) {
 
         walletStatus.textContent =
-            isMobile()
-                ? "OPEN THIS SITE INSIDE SOLFLARE"
-                : "SOLFLARE NOT FOUND";
+            "SOLFLARE NOT FOUND";
 
         return;
     }
@@ -682,33 +792,33 @@ async function connectSolflare() {
 }
 
 
-/* BACKPACK */
-
-function getBackpack() {
-
-    if (
-        window.backpack &&
-        window.backpack.solana
-    ) {
-
-        return window.backpack.solana;
-    }
-
-    return null;
-}
-
+/* BACKPACK CONNECTION */
 
 async function connectBackpack() {
 
     const provider =
         getBackpack();
 
+
+    if (!provider && isMobile()) {
+
+        walletStatus.textContent =
+            "OPENING BACKPACK...";
+
+        setTimeout(() => {
+
+            openBackpack();
+
+        }, 300);
+
+        return;
+    }
+
+
     if (!provider) {
 
         walletStatus.textContent =
-            isMobile()
-                ? "OPEN THIS SITE INSIDE BACKPACK"
-                : "BACKPACK NOT FOUND";
+            "BACKPACK NOT FOUND";
 
         return;
     }
