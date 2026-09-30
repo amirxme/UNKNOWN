@@ -4,6 +4,7 @@ let count = 0;
 let connectedWallet = null;
 let walletProvider = null;
 let pressing = false;
+let isHolder = false;
 
 /* ELEMENTS */
 
@@ -380,6 +381,72 @@ function openBackpack() {
 }
 
 
+/* HOLDER CHECK */
+
+async function checkHolder(wallet) {
+
+    try {
+
+        walletStatus.textContent =
+            "CHECKING HOLDER STATUS...";
+
+        const response =
+            await fetch(
+                `/api/holders?wallet=${encodeURIComponent(wallet)}`
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                data.error ||
+                "Holder check failed"
+            );
+        }
+
+        isHolder =
+            data.holder === true;
+
+        if (isHolder) {
+
+            walletStatus.textContent =
+                "HOLDER · PRESS UNLOCKED";
+
+            pressButton.disabled = false;
+
+        } else {
+
+            walletStatus.textContent =
+                "HOLD $UNKNOWN TO PRESS";
+
+            pressButton.disabled = true;
+        }
+
+        return isHolder;
+
+    } catch (error) {
+
+        console.error(
+            "Holder check error:",
+            error
+        );
+
+        isHolder = false;
+
+        pressButton.disabled = true;
+
+        walletStatus.textContent =
+            "HOLDER CHECK FAILED";
+
+        return false;
+    }
+}
+
+
 /* SET CONNECTED WALLET */
 
 function setConnectedWallet(provider, publicKey) {
@@ -399,6 +466,12 @@ function setConnectedWallet(provider, publicKey) {
         shortenAddress(
             connectedWallet
         );
+
+    pressButton.disabled = true;
+
+    checkHolder(
+        connectedWallet
+    );
 
     setTimeout(() => {
 
@@ -648,6 +721,16 @@ pressButton.addEventListener(
             return;
         }
 
+        if (!isHolder) {
+
+            walletStatus.textContent =
+                "HOLD $UNKNOWN TO PRESS";
+
+            pressButton.disabled = true;
+
+            return;
+        }
+
         if (
             typeof walletProvider.signMessage !==
             "function"
@@ -734,6 +817,18 @@ pressButton.addEventListener(
                     walletStatus.textContent =
                         "THIS WALLET ALREADY PRESSED";
 
+                } else if (
+                    data.error ===
+                    "HOLDER ONLY"
+                ) {
+
+                    isHolder = false;
+
+                    pressButton.disabled = true;
+
+                    walletStatus.textContent =
+                        "HOLD $UNKNOWN TO PRESS";
+
                 } else {
 
                     walletStatus.textContent =
@@ -797,7 +892,10 @@ pressButton.addEventListener(
 
             pressing = false;
 
-            if (count < TARGET) {
+            if (
+                count < TARGET &&
+                isHolder
+            ) {
                 pressButton.disabled = false;
             }
         }
