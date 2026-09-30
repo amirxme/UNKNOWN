@@ -58,16 +58,19 @@ export default async function handler(req, res) {
             });
         }
 
-        const alreadyPressed =
-            await redis.get(
-                `unknown:wallet:${wallet}`
-            );
+        const claimed = await redis.set(
+    `unknown:wallet:${wallet}`,
+    "processing",
+    {
+        nx: true
+    }
+);
 
-        if (alreadyPressed) {
-            return res.status(400).json({
-                error: "This wallet already pressed"
-            });
-        }
+if (claimed !== "OK") {
+    return res.status(400).json({
+        error: "This wallet already pressed"
+    });
+}
 
         const result = await redis.eval(
             `
