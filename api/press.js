@@ -1,22 +1,75 @@
 import { Redis } from "@upstash/redis";
+import nacl from "tweetnacl";
+import bs58 from "bs58";
 
 const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
+
+    if (req.method !== "POST") {
+        return res.status(405).json({
+            error: "Method not allowed"
+        });
+    }
+
     try {
-        const test = await redis.incr("unknown:test");
+
+        const {
+            wallet,
+            message,
+            signature
+        } = req.body;
+
+        if (!wallet || !message || !signature) {
+            return res.status(400).json({
+                error: "Missing wallet, message or signature"
+            });
+        }
+
+        const publicKey = bs58.decode(wallet);
+        const signedMessage = new TextEncoder().encode(message);
+        const signedMessageBytes = bs58.decode(signature);
+
+        const valid = nacl.sign.detached.verify(
+            signedMessage,
+            signedMessageBytes,
+            publicKey
+        );
+
+        if (!valid) {
+            return res.status(401).json({
+                error: "Invalid signature"
+            });
+        }
+
+        const alreadyPressed = await redis.get(
+            `unknown:wallet:${wallet}`
+        );
+
+        if (alreadyPressed) {
+            return res.status(400).json({
+                error: "This wallet already pressed"
+            });
+        }
+
+        const count = await redis.incr("unknown:count");
+
+        await redis.set(
+            `unknown:wallet:${wallet}`,
+            count
+        );
 
         return res.status(200).json({
             success: true,
-            redis: true,
-            test
+            count
         });
 
     } catch (error) {
+
         return res.status(500).json({
             success: false,
-            redis: false,
             error: error.message
         });
+
     }
 }
