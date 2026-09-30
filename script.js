@@ -1,4 +1,4 @@
-const TARGET = 50000;
+const TARGET = 10000;
 
 let count = 0;
 let connectedWallet = null;
