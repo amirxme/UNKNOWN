@@ -1060,16 +1060,31 @@ async function loadCounter() {
             await response.json();
 
         if (
-    data.success &&
-    typeof data.count === "number"
-) {
-    count = data.count;
-    updateCounter();
+            data.success &&
+            typeof data.count === "number"
+        ) {
+            count = data.count;
+            updateCounter();
 
-    if (count >= TARGET) {
-        finishExperiment();
-    }
-}
+            if (count >= TARGET) {
+                finishExperiment();
+            }
+        }
+
+        const activityResponse =
+            await fetch("/api/activity");
+
+        const activityData =
+            await activityResponse.json();
+
+        if (
+            activityData.success &&
+            Array.isArray(activityData.activity)
+        ) {
+            renderActivity(
+                activityData.activity
+            );
+        }
 
     } catch (error) {
 
