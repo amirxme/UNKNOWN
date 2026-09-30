@@ -763,7 +763,7 @@ pressButton.addEventListener(
             count =
                 data.count;
 
-            updateCounter();
+            updateCounter(true);
 
             addActivity(
                 connectedWallet
