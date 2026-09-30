@@ -97,7 +97,13 @@ export default async function handler(req, res) {
                 error: "Invalid signature"
             });
         }
+const holder = await isHolder(wallet);
 
+if (!holder) {
+    return res.status(403).json({
+        error: "HOLDER ONLY"
+    });
+}
         const result = await redis.eval(
     `
     local count = tonumber(redis.call("GET", KEYS[1]) or "0")
