@@ -71,7 +71,17 @@ if (req.method !== "POST") {
 
         const count =
             await redis.incr("unknown:count");
+const currentCount =
+    Number(await redis.get("unknown:count")) || 0;
 
+if (currentCount >= 10000) {
+    return res.status(400).json({
+        error: "Experiment completed"
+    });
+}
+
+const count =
+    await redis.incr("unknown:count");
         await redis.set(
             `unknown:wallet:${wallet}`,
             count
