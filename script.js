@@ -126,6 +126,25 @@ function addActivity(wallet) {
 }
 
 
+function renderActivity(activity) {
+
+    activityList.innerHTML = "";
+
+    if (!Array.isArray(activity)) {
+        return;
+    }
+
+    activity.forEach(event => {
+
+        if (!event || !event.wallet) {
+            return;
+        }
+
+        addActivity(event.wallet);
+    });
+}
+
+
 /* MOBILE */
 
 function isMobile() {
