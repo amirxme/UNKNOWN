@@ -706,7 +706,17 @@ pressButton.addEventListener(
 
             return;
         }
+if (!isHolder) {
 
+    walletStatus.textContent =
+        "HOLDER ACCESS REQUIRED";
+
+    await verifyHolder();
+
+    if (!isHolder) {
+        return;
+    }
+}
         if (
             typeof walletProvider.signMessage !==
             "function"
