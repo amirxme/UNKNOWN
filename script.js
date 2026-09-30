@@ -1,6 +1,7 @@
 const TARGET = 50000;
 
 let count = 0;
+let connectedWallet = null;
 
 
 /* ELEMENTS */
@@ -35,6 +36,18 @@ const walletOverlay =
 const closeWallet =
     document.getElementById("closeWallet");
 
+const phantomButton =
+    document.getElementById("phantomButton");
+
+const solflareButton =
+    document.getElementById("solflareButton");
+
+const backpackButton =
+    document.getElementById("backpackButton");
+
+const walletStatus =
+    document.getElementById("walletStatus");
+
 
 /* COUNTER */
 
@@ -51,7 +64,7 @@ function updateCounter() {
 }
 
 
-/* BUTTON EFFECT */
+/* BUTTON ANIMATION */
 
 function buttonPulse() {
 
@@ -69,12 +82,26 @@ function buttonPulse() {
 }
 
 
+/* WALLET ADDRESS */
+
+function shortenAddress(address) {
+
+    return (
+        address.slice(0, 4) +
+        "..." +
+        address.slice(-4)
+    );
+}
+
+
 /* ACTIVITY */
 
 function addActivity() {
 
     const wallet =
-        generateWallet();
+        connectedWallet
+            ? shortenAddress(connectedWallet)
+            : generateWallet();
 
     const item =
         document.createElement("div");
@@ -83,6 +110,7 @@ function addActivity() {
         "activity-empty";
 
     item.style.opacity = "0";
+
     item.style.transform =
         "translateY(-6px)";
 
@@ -102,7 +130,9 @@ function addActivity() {
             "translateY(0)";
     });
 
-    while (activityList.children.length > 3) {
+    while (
+        activityList.children.length > 3
+    ) {
 
         activityList.removeChild(
             activityList.lastChild
@@ -111,7 +141,7 @@ function addActivity() {
 }
 
 
-/* TEMPORARY WALLET DISPLAY */
+/* TEMPORARY FAKE ADDRESS */
 
 function generateWallet() {
 
@@ -125,7 +155,8 @@ function generateWallet() {
         result +=
             chars[
                 Math.floor(
-                    Math.random() * chars.length
+                    Math.random() *
+                    chars.length
                 )
             ];
     }
@@ -137,7 +168,8 @@ function generateWallet() {
         result +=
             chars[
                 Math.floor(
-                    Math.random() * chars.length
+                    Math.random() *
+                    chars.length
                 )
             ];
     }
@@ -178,64 +210,64 @@ function finishExperiment() {
 
     pressButton.disabled = true;
 
-    setTimeout(
-        () => {
+    setTimeout(() => {
 
-            document.body.innerHTML = `
-                <main
-                    style="
-                        min-height:100vh;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        text-align:center;
-                        padding:30px;
-                        background:#08090c;
-                    "
-                >
+        document.body.innerHTML = `
 
-                    <div>
+            <main
+                style="
+                    min-height:100vh;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    text-align:center;
+                    padding:30px;
+                    background:#08090c;
+                "
+            >
 
-                        <div
-                            style="
-                                font-size:10px;
-                                letter-spacing:.3em;
-                                color:#777d88;
-                                margin-bottom:25px;
-                            "
-                        >
-                            UNKNOWN
-                        </div>
+                <div>
 
-                        <h1
-                            style="
-                                font-size:clamp(32px,7vw,70px);
-                                font-weight:500;
-                                letter-spacing:.08em;
-                            "
-                        >
-                            ...
-                        </h1>
-
+                    <div
+                        style="
+                            font-size:10px;
+                            letter-spacing:.3em;
+                            color:#777d88;
+                            margin-bottom:25px;
+                        "
+                    >
+                        UNKNOWN
                     </div>
 
-                </main>
-            `;
+                    <h1
+                        style="
+                            font-size:clamp(32px,7vw,70px);
+                            font-weight:500;
+                            letter-spacing:.08em;
+                        "
+                    >
+                        ...
+                    </h1>
 
-        },
-        2500
-    );
+                </div>
+
+            </main>
+        `;
+
+    }, 2500);
 }
 
 
 /* LEADERBOARD */
 
 const leaderboardData = [
+
     ["7xK...92F", 37],
     ["A91...K2Q", 31],
     ["4Pm...8Ls", 24],
     ["9Qw...L7A", 19],
     ["3Hd...P2M", 15]
+
 ];
 
 
@@ -265,9 +297,11 @@ function renderLeaderboard() {
             row.style.borderBottom =
                 "1px solid rgba(255,255,255,0.06)";
 
-            row.style.fontSize = "11px";
+            row.style.fontSize =
+                "11px";
 
             row.innerHTML = `
+
                 <span style="color:#555b65">
                     ${String(index + 1).padStart(2, "0")}
                 </span>
@@ -279,6 +313,7 @@ function renderLeaderboard() {
                 <span style="text-align:right">
                     ${entry[1]}
                 </span>
+
             `;
 
             list.appendChild(row);
@@ -286,8 +321,6 @@ function renderLeaderboard() {
     );
 }
 
-
-/* LEADERBOARD OPEN */
 
 leaderboardButton.addEventListener(
     "click",
@@ -302,8 +335,6 @@ leaderboardButton.addEventListener(
 );
 
 
-/* LEADERBOARD CLOSE */
-
 closeLeaderboard.addEventListener(
     "click",
     () => {
@@ -315,7 +346,7 @@ closeLeaderboard.addEventListener(
 );
 
 
-/* WALLET */
+/* WALLET MODAL */
 
 walletButton.addEventListener(
     "click",
@@ -328,8 +359,6 @@ walletButton.addEventListener(
 );
 
 
-/* WALLET CLOSE */
-
 closeWallet.addEventListener(
     "click",
     () => {
@@ -341,7 +370,7 @@ closeWallet.addEventListener(
 );
 
 
-/* CLOSE OUTSIDE */
+/* CLOSE BY CLICKING OUTSIDE */
 
 leaderboardOverlay.addEventListener(
     "click",
@@ -373,6 +402,149 @@ walletOverlay.addEventListener(
                 "active"
             );
         }
+    }
+);
+
+
+/* WALLET CONNECTION */
+
+async function connectWallet(type) {
+
+    try {
+
+        let provider = null;
+
+        if (type === "phantom") {
+
+            if (
+                window.phantom &&
+                window.phantom.solana
+            ) {
+
+                provider =
+                    window.phantom.solana;
+
+            } else {
+
+                walletStatus.textContent =
+                    "PHANTOM NOT FOUND";
+
+                return;
+            }
+        }
+
+
+        if (type === "solflare") {
+
+            if (window.solflare) {
+
+                provider =
+                    window.solflare;
+
+            } else {
+
+                walletStatus.textContent =
+                    "SOLFLARE NOT FOUND";
+
+                return;
+            }
+        }
+
+
+        if (type === "backpack") {
+
+            if (
+                window.backpack &&
+                window.backpack.solana
+            ) {
+
+                provider =
+                    window.backpack.solana;
+
+            } else {
+
+                walletStatus.textContent =
+                    "BACKPACK NOT FOUND";
+
+                return;
+            }
+        }
+
+
+        walletStatus.textContent =
+            "CONNECTING...";
+
+
+        const response =
+            await provider.connect();
+
+
+        connectedWallet =
+            response.publicKey.toString();
+
+
+        walletStatus.textContent =
+            "CONNECTED · " +
+            shortenAddress(
+                connectedWallet
+            );
+
+
+        walletButton.textContent =
+            shortenAddress(
+                connectedWallet
+            );
+
+
+        setTimeout(() => {
+
+            walletOverlay.classList.remove(
+                "active"
+            );
+
+        }, 800);
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        walletStatus.textContent =
+            "CONNECTION CANCELLED";
+
+    }
+
+}
+
+
+/* WALLET BUTTONS */
+
+phantomButton.addEventListener(
+    "click",
+    () => {
+
+        connectWallet("phantom");
+
+    }
+);
+
+
+solflareButton.addEventListener(
+    "click",
+    () => {
+
+        connectWallet("solflare");
+
+    }
+);
+
+
+backpackButton.addEventListener(
+    "click",
+    () => {
+
+        connectWallet("backpack");
+
     }
 );
 
