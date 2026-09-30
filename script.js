@@ -954,4 +954,31 @@ backpackButton.addEventListener(
 
 /* INITIAL */
 
-updateCounter();
+async function loadCounter() {
+
+    try {
+
+        const response =
+            await fetch("/api/press");
+
+        const data =
+            await response.json();
+
+        if (
+            data.success &&
+            typeof data.count === "number"
+        ) {
+            count = data.count;
+            updateCounter();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Counter loading error:",
+            error
+        );
+    }
+}
+
+loadCounter();
