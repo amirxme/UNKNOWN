@@ -6,68 +6,40 @@ let connectedWallet = null;
 
 /* ELEMENTS */
 
-const pressButton =
-    document.getElementById("pressButton");
+const pressButton = document.getElementById("pressButton");
+const currentCount = document.getElementById("currentCount");
+const progressFill = document.getElementById("progressFill");
+const activityList = document.getElementById("activityList");
 
-const currentCount =
-    document.getElementById("currentCount");
+const leaderboardButton = document.getElementById("leaderboardButton");
+const leaderboardOverlay = document.getElementById("leaderboardOverlay");
+const closeLeaderboard = document.getElementById("closeLeaderboard");
 
-const progressFill =
-    document.getElementById("progressFill");
+const walletButton = document.getElementById("walletButton");
+const walletOverlay = document.getElementById("walletOverlay");
+const closeWallet = document.getElementById("closeWallet");
 
-const activityList =
-    document.getElementById("activityList");
+const phantomButton = document.getElementById("phantomButton");
+const solflareButton = document.getElementById("solflareButton");
+const backpackButton = document.getElementById("backpackButton");
 
-const leaderboardButton =
-    document.getElementById("leaderboardButton");
-
-const leaderboardOverlay =
-    document.getElementById("leaderboardOverlay");
-
-const closeLeaderboard =
-    document.getElementById("closeLeaderboard");
-
-const walletButton =
-    document.getElementById("walletButton");
-
-const walletOverlay =
-    document.getElementById("walletOverlay");
-
-const closeWallet =
-    document.getElementById("closeWallet");
-
-const phantomButton =
-    document.getElementById("phantomButton");
-
-const solflareButton =
-    document.getElementById("solflareButton");
-
-const backpackButton =
-    document.getElementById("backpackButton");
-
-const walletStatus =
-    document.getElementById("walletStatus");
+const walletStatus = document.getElementById("walletStatus");
 
 
 /* COUNTER */
 
 function updateCounter() {
+    currentCount.textContent = count.toLocaleString("en-US");
 
-    currentCount.textContent =
-        count.toLocaleString("en-US");
+    const progress = (count / TARGET) * 100;
 
-    const progress =
-        (count / TARGET) * 100;
-
-    progressFill.style.width =
-        `${progress}%`;
+    progressFill.style.width = `${progress}%`;
 }
 
 
-/* BUTTON ANIMATION */
+/* BUTTON PULSE */
 
 function buttonPulse() {
-
     pressButton.classList.remove("pulse");
 
     void pressButton.offsetWidth;
@@ -75,103 +47,68 @@ function buttonPulse() {
     pressButton.classList.add("pulse");
 
     setTimeout(() => {
-
         pressButton.classList.remove("pulse");
-
     }, 450);
 }
 
 
-/* WALLET ADDRESS */
+/* ADDRESS */
 
 function shortenAddress(address) {
-
-    return (
-        address.slice(0, 4) +
-        "..." +
-        address.slice(-4)
-    );
+    return address.slice(0, 4) + "..." + address.slice(-4);
 }
 
 
 /* ACTIVITY */
 
 function addActivity() {
+    const wallet = connectedWallet
+        ? shortenAddress(connectedWallet)
+        : generateWallet();
 
-    const wallet =
-        connectedWallet
-            ? shortenAddress(connectedWallet)
-            : generateWallet();
+    const item = document.createElement("div");
 
-    const item =
-        document.createElement("div");
-
-    item.className =
-        "activity-empty";
+    item.className = "activity-empty";
 
     item.style.opacity = "0";
+    item.style.transform = "translateY(-6px)";
 
-    item.style.transform =
-        "translateY(-6px)";
-
-    item.textContent =
-        `${wallet} pressed`;
+    item.textContent = `${wallet} pressed`;
 
     activityList.prepend(item);
 
     requestAnimationFrame(() => {
-
         item.style.transition =
             "opacity .35s ease, transform .35s ease";
 
         item.style.opacity = "1";
-
-        item.style.transform =
-            "translateY(0)";
+        item.style.transform = "translateY(0)";
     });
 
-    while (
-        activityList.children.length > 3
-    ) {
-
-        activityList.removeChild(
-            activityList.lastChild
-        );
+    while (activityList.children.length > 3) {
+        activityList.removeChild(activityList.lastChild);
     }
 }
 
 
-/* TEMPORARY FAKE ADDRESS */
-
 function generateWallet() {
-
     const chars =
         "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789";
 
     let result = "";
 
     for (let i = 0; i < 4; i++) {
-
-        result +=
-            chars[
-                Math.floor(
-                    Math.random() *
-                    chars.length
-                )
-            ];
+        result += chars[
+            Math.floor(Math.random() * chars.length)
+        ];
     }
 
     result += "...";
 
     for (let i = 0; i < 3; i++) {
-
-        result +=
-            chars[
-                Math.floor(
-                    Math.random() *
-                    chars.length
-                )
-            ];
+        result += chars[
+            Math.floor(Math.random() * chars.length)
+        ];
     }
 
     return result;
@@ -180,31 +117,25 @@ function generateWallet() {
 
 /* PRESS */
 
-pressButton.addEventListener(
-    "click",
-    () => {
+pressButton.addEventListener("click", () => {
 
-        if (count >= TARGET) {
-            return;
-        }
-
-        count++;
-
-        updateCounter();
-
-        addActivity();
-
-        buttonPulse();
-
-        if (count === TARGET) {
-
-            finishExperiment();
-        }
+    if (count >= TARGET) {
+        return;
     }
-);
+
+    count++;
+
+    updateCounter();
+    addActivity();
+    buttonPulse();
+
+    if (count === TARGET) {
+        finishExperiment();
+    }
+});
 
 
-/* FINAL EVENT */
+/* FINAL */
 
 function finishExperiment() {
 
@@ -213,7 +144,6 @@ function finishExperiment() {
     setTimeout(() => {
 
         document.body.innerHTML = `
-
             <main
                 style="
                     min-height:100vh;
@@ -225,7 +155,6 @@ function finishExperiment() {
                     background:#08090c;
                 "
             >
-
                 <div>
 
                     <div
@@ -250,7 +179,6 @@ function finishExperiment() {
                     </h1>
 
                 </div>
-
             </main>
         `;
 
@@ -261,152 +189,157 @@ function finishExperiment() {
 /* LEADERBOARD */
 
 const leaderboardData = [
-
     ["7xK...92F", 37],
     ["A91...K2Q", 31],
     ["4Pm...8Ls", 24],
     ["9Qw...L7A", 19],
     ["3Hd...P2M", 15]
-
 ];
 
 
 function renderLeaderboard() {
 
     const list =
-        document.getElementById(
-            "leaderboardList"
-        );
+        document.getElementById("leaderboardList");
 
     list.innerHTML = "";
 
-    leaderboardData.forEach(
-        (entry, index) => {
+    leaderboardData.forEach((entry, index) => {
 
-            const row =
-                document.createElement("div");
+        const row =
+            document.createElement("div");
 
-            row.style.display = "grid";
+        row.style.display = "grid";
+        row.style.gridTemplateColumns = "35px 1fr 60px";
+        row.style.padding = "14px 0";
+        row.style.borderBottom =
+            "1px solid rgba(255,255,255,0.06)";
+        row.style.fontSize = "11px";
 
-            row.style.gridTemplateColumns =
-                "35px 1fr 60px";
+        row.innerHTML = `
+            <span style="color:#555b65">
+                ${String(index + 1).padStart(2, "0")}
+            </span>
 
-            row.style.padding =
-                "14px 0";
+            <span>
+                ${entry[0]}
+            </span>
 
-            row.style.borderBottom =
-                "1px solid rgba(255,255,255,0.06)";
+            <span style="text-align:right">
+                ${entry[1]}
+            </span>
+        `;
 
-            row.style.fontSize =
-                "11px";
-
-            row.innerHTML = `
-
-                <span style="color:#555b65">
-                    ${String(index + 1).padStart(2, "0")}
-                </span>
-
-                <span>
-                    ${entry[0]}
-                </span>
-
-                <span style="text-align:right">
-                    ${entry[1]}
-                </span>
-
-            `;
-
-            list.appendChild(row);
-        }
-    );
+        list.appendChild(row);
+    });
 }
 
 
-leaderboardButton.addEventListener(
-    "click",
-    () => {
+leaderboardButton.addEventListener("click", () => {
 
-        renderLeaderboard();
+    renderLeaderboard();
 
-        leaderboardOverlay.classList.add(
-            "active"
-        );
-    }
-);
+    leaderboardOverlay.classList.add("active");
+});
 
 
-closeLeaderboard.addEventListener(
-    "click",
-    () => {
+closeLeaderboard.addEventListener("click", () => {
 
-        leaderboardOverlay.classList.remove(
-            "active"
-        );
-    }
-);
+    leaderboardOverlay.classList.remove("active");
+});
 
 
 /* WALLET MODAL */
 
-walletButton.addEventListener(
-    "click",
-    () => {
+walletButton.addEventListener("click", () => {
 
-        walletOverlay.classList.add(
-            "active"
-        );
+    walletOverlay.classList.add("active");
+});
+
+
+closeWallet.addEventListener("click", () => {
+
+    walletOverlay.classList.remove("active");
+});
+
+
+leaderboardOverlay.addEventListener("click", (event) => {
+
+    if (event.target === leaderboardOverlay) {
+        leaderboardOverlay.classList.remove("active");
     }
-);
+});
 
 
-closeWallet.addEventListener(
-    "click",
-    () => {
+walletOverlay.addEventListener("click", (event) => {
 
-        walletOverlay.classList.remove(
-            "active"
-        );
+    if (event.target === walletOverlay) {
+        walletOverlay.classList.remove("active");
     }
-);
+});
 
 
-/* CLOSE BY CLICKING OUTSIDE */
+/* FIND PHANTOM */
 
-leaderboardOverlay.addEventListener(
-    "click",
-    (event) => {
+function getPhantomProvider() {
 
-        if (
-            event.target ===
-            leaderboardOverlay
-        ) {
-
-            leaderboardOverlay.classList.remove(
-                "active"
-            );
-        }
+    if (
+        window.phantom &&
+        window.phantom.solana &&
+        window.phantom.solana.isPhantom
+    ) {
+        return window.phantom.solana;
     }
-);
 
-
-walletOverlay.addEventListener(
-    "click",
-    (event) => {
-
-        if (
-            event.target ===
-            walletOverlay
-        ) {
-
-            walletOverlay.classList.remove(
-                "active"
-            );
-        }
+    if (
+        window.solana &&
+        window.solana.isPhantom
+    ) {
+        return window.solana;
     }
-);
+
+    if (
+        window.solana &&
+        typeof window.solana.connect === "function"
+    ) {
+        return window.solana;
+    }
+
+    return null;
+}
 
 
-/* WALLET CONNECTION */
+/* FIND SOLFLARE */
+
+function getSolflareProvider() {
+
+    if (
+        window.solflare &&
+        typeof window.solflare.connect === "function"
+    ) {
+        return window.solflare;
+    }
+
+    return null;
+}
+
+
+/* FIND BACKPACK */
+
+function getBackpackProvider() {
+
+    if (
+        window.backpack &&
+        window.backpack.solana
+    ) {
+        return window.backpack.solana;
+    }
+
+    return null;
+}
+
+
+/* CONNECT */
 
 async function connectWallet(type) {
 
@@ -414,17 +347,12 @@ async function connectWallet(type) {
 
         let provider = null;
 
+
         if (type === "phantom") {
 
-            if (
-                window.phantom &&
-                window.phantom.solana
-            ) {
+            provider = getPhantomProvider();
 
-                provider =
-                    window.phantom.solana;
-
-            } else {
+            if (!provider) {
 
                 walletStatus.textContent =
                     "PHANTOM NOT FOUND";
@@ -436,12 +364,9 @@ async function connectWallet(type) {
 
         if (type === "solflare") {
 
-            if (window.solflare) {
+            provider = getSolflareProvider();
 
-                provider =
-                    window.solflare;
-
-            } else {
+            if (!provider) {
 
                 walletStatus.textContent =
                     "SOLFLARE NOT FOUND";
@@ -453,15 +378,9 @@ async function connectWallet(type) {
 
         if (type === "backpack") {
 
-            if (
-                window.backpack &&
-                window.backpack.solana
-            ) {
+            provider = getBackpackProvider();
 
-                provider =
-                    window.backpack.solana;
-
-            } else {
+            if (!provider) {
 
                 walletStatus.textContent =
                     "BACKPACK NOT FOUND";
@@ -479,76 +398,65 @@ async function connectWallet(type) {
             await provider.connect();
 
 
+        if (!response || !response.publicKey) {
+
+            walletStatus.textContent =
+                "WALLET ADDRESS NOT FOUND";
+
+            return;
+        }
+
+
         connectedWallet =
             response.publicKey.toString();
 
 
         walletStatus.textContent =
             "CONNECTED · " +
-            shortenAddress(
-                connectedWallet
-            );
+            shortenAddress(connectedWallet);
 
 
         walletButton.textContent =
-            shortenAddress(
-                connectedWallet
-            );
+            shortenAddress(connectedWallet);
 
 
         setTimeout(() => {
 
-            walletOverlay.classList.remove(
-                "active"
-            );
+            walletOverlay.classList.remove("active");
 
         }, 800);
 
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Wallet connection error:",
+            error
+        );
 
         walletStatus.textContent =
             "CONNECTION CANCELLED";
-
     }
-
 }
 
 
 /* WALLET BUTTONS */
 
-phantomButton.addEventListener(
-    "click",
-    () => {
-
-        connectWallet("phantom");
-
-    }
-);
+phantomButton.addEventListener("click", () => {
+    connectWallet("phantom");
+});
 
 
-solflareButton.addEventListener(
-    "click",
-    () => {
-
-        connectWallet("solflare");
-
-    }
-);
+solflareButton.addEventListener("click", () => {
+    connectWallet("solflare");
+});
 
 
-backpackButton.addEventListener(
-    "click",
-    () => {
-
-        connectWallet("backpack");
-
-    }
-);
+backpackButton.addEventListener("click", () => {
+    connectWallet("backpack");
+});
 
 
-/* INITIAL STATE */
+/* INITIAL */
 
 updateCounter();
