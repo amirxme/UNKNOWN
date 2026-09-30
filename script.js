@@ -5,10 +5,17 @@ let count = 0;
 
 /* ELEMENTS */
 
-const pressButton = document.getElementById("pressButton");
-const currentCount = document.getElementById("currentCount");
-const progressFill = document.getElementById("progressFill");
-const activityList = document.getElementById("activityList");
+const pressButton =
+    document.getElementById("pressButton");
+
+const currentCount =
+    document.getElementById("currentCount");
+
+const progressFill =
+    document.getElementById("progressFill");
+
+const activityList =
+    document.getElementById("activityList");
 
 const leaderboardButton =
     document.getElementById("leaderboardButton");
@@ -44,6 +51,24 @@ function updateCounter() {
 }
 
 
+/* BUTTON EFFECT */
+
+function buttonPulse() {
+
+    pressButton.classList.remove("pulse");
+
+    void pressButton.offsetWidth;
+
+    pressButton.classList.add("pulse");
+
+    setTimeout(() => {
+
+        pressButton.classList.remove("pulse");
+
+    }, 450);
+}
+
+
 /* ACTIVITY */
 
 function addActivity() {
@@ -57,12 +82,28 @@ function addActivity() {
     item.className =
         "activity-empty";
 
+    item.style.opacity = "0";
+    item.style.transform =
+        "translateY(-6px)";
+
     item.textContent =
         `${wallet} pressed`;
 
     activityList.prepend(item);
 
+    requestAnimationFrame(() => {
+
+        item.style.transition =
+            "opacity .35s ease, transform .35s ease";
+
+        item.style.opacity = "1";
+
+        item.style.transform =
+            "translateY(0)";
+    });
+
     while (activityList.children.length > 3) {
+
         activityList.removeChild(
             activityList.lastChild
         );
@@ -82,7 +123,11 @@ function generateWallet() {
     for (let i = 0; i < 4; i++) {
 
         result +=
-            chars[Math.floor(Math.random() * chars.length)];
+            chars[
+                Math.floor(
+                    Math.random() * chars.length
+                )
+            ];
     }
 
     result += "...";
@@ -90,7 +135,11 @@ function generateWallet() {
     for (let i = 0; i < 3; i++) {
 
         result +=
-            chars[Math.floor(Math.random() * chars.length)];
+            chars[
+                Math.floor(
+                    Math.random() * chars.length
+                )
+            ];
     }
 
     return result;
@@ -113,16 +162,10 @@ pressButton.addEventListener(
 
         addActivity();
 
-        pressButton.classList.add("pressed");
-
-        setTimeout(
-            () => {
-                pressButton.classList.remove("pressed");
-            },
-            180
-        );
+        buttonPulse();
 
         if (count === TARGET) {
+
             finishExperiment();
         }
     }
@@ -132,6 +175,8 @@ pressButton.addEventListener(
 /* FINAL EVENT */
 
 function finishExperiment() {
+
+    pressButton.disabled = true;
 
     setTimeout(
         () => {
@@ -145,6 +190,7 @@ function finishExperiment() {
                         justify-content:center;
                         text-align:center;
                         padding:30px;
+                        background:#08090c;
                     "
                 >
 
@@ -209,6 +255,7 @@ function renderLeaderboard() {
                 document.createElement("div");
 
             row.style.display = "grid";
+
             row.style.gridTemplateColumns =
                 "35px 1fr 60px";
 
@@ -218,8 +265,7 @@ function renderLeaderboard() {
             row.style.borderBottom =
                 "1px solid rgba(255,255,255,0.06)";
 
-            row.style.fontSize =
-                "11px";
+            row.style.fontSize = "11px";
 
             row.innerHTML = `
                 <span style="color:#555b65">
@@ -295,7 +341,7 @@ closeWallet.addEventListener(
 );
 
 
-/* CLOSE WHEN CLICKING OUTSIDE */
+/* CLOSE OUTSIDE */
 
 leaderboardOverlay.addEventListener(
     "click",
