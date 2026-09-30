@@ -2,7 +2,6 @@ const TARGET = 10000;
 
 let count = 0;
 let connectedWallet = null;
-let isHolder = false;
 let walletProvider = null;
 let pressing = false;
 
@@ -390,19 +389,16 @@ function setConnectedWallet(provider, publicKey) {
     connectedWallet =
         publicKey.toString();
 
-    isHolder = false;
-
     walletStatus.textContent =
-        "CHECKING HOLDER STATUS...";
+        "CONNECTED · " +
+        shortenAddress(
+            connectedWallet
+        );
 
     walletButton.textContent =
         shortenAddress(
             connectedWallet
         );
-
-    pressButton.disabled = true;
-
-    verifyHolder();
 
     setTimeout(() => {
 
@@ -412,62 +408,7 @@ function setConnectedWallet(provider, publicKey) {
 
     }, 700);
 }
-async function verifyHolder() {
 
-    if (!connectedWallet) {
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch("/api/holders", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    wallet: connectedWallet
-                })
-            });
-
-        const data =
-            await response.json();
-
-        isHolder =
-            data.success === true &&
-            data.holder === true;
-
-        if (isHolder) {
-
-            walletStatus.textContent =
-                "HOLDER VERIFIED";
-
-            pressButton.disabled = false;
-
-        } else {
-
-            walletStatus.textContent =
-                "HOLDER ACCESS REQUIRED";
-
-            pressButton.disabled = true;
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Holder verification error:",
-            error
-        );
-
-        isHolder = false;
-
-        pressButton.disabled = true;
-
-        walletStatus.textContent =
-            "HOLDER CHECK FAILED";
-    }
-}
 
 /* PHANTOM CONNECTION */
 
@@ -706,17 +647,7 @@ pressButton.addEventListener(
 
             return;
         }
-if (!isHolder) {
 
-    walletStatus.textContent =
-        "HOLDER ACCESS REQUIRED";
-
-    await verifyHolder();
-
-    if (!isHolder) {
-        return;
-    }
-}
         if (
             typeof walletProvider.signMessage !==
             "function"
@@ -736,12 +667,6 @@ if (!isHolder) {
 
             walletStatus.textContent =
                 "SIGN TO PRESS...";
-
-            /*
-             * Unique message for this wallet.
-             * The server verifies that the wallet
-             * actually signed this message.
-             */
 
             const message =
                 `UNKNOWN PRESS\nWallet: ${connectedWallet}\nTime: ${Date.now()}`;
@@ -868,14 +793,15 @@ if (!isHolder) {
                     "PRESS FAILED";
             }
 
-        finally {
+        } finally {
 
-    pressing = false;
+            pressing = false;
 
-    if (count < TARGET) {
-        pressButton.disabled = !isHolder;
+            if (count < TARGET) {
+                pressButton.disabled = false;
+            }
+        }
     }
-}
 );
 
 
