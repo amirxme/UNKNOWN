@@ -8,22 +8,8 @@ export default async function handler(req, res) {
 
     if (req.method === "GET") {
 
-        const count = Number(result);
-
-        await redis.lpush(
-            "unknown:activity",
-            JSON.stringify({
-                wallet,
-                count,
-                timestamp: Date.now()
-            })
-        );
-
-        await redis.ltrim(
-            "unknown:activity",
-            0,
-            2
-        );
+        const count =
+            Number(await redis.get("unknown:count")) || 0;
 
         return res.status(200).json({
             success: true,
