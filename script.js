@@ -75,9 +75,7 @@ function buttonPulse() {
     pressButton.classList.add("pulse");
 
     setTimeout(() => {
-
         pressButton.classList.remove("pulse");
-
     }, 450);
 }
 
@@ -106,13 +104,10 @@ function addActivity() {
     const item =
         document.createElement("div");
 
-    item.className =
-        "activity-empty";
+    item.className = "activity-empty";
 
     item.style.opacity = "0";
-
-    item.style.transform =
-        "translateY(-6px)";
+    item.style.transform = "translateY(-6px)";
 
     item.textContent =
         `${wallet} pressed`;
@@ -125,14 +120,10 @@ function addActivity() {
             "opacity .35s ease, transform .35s ease";
 
         item.style.opacity = "1";
-
-        item.style.transform =
-            "translateY(0)";
+        item.style.transform = "translateY(0)";
     });
 
-    while (
-        activityList.children.length > 3
-    ) {
+    while (activityList.children.length > 3) {
 
         activityList.removeChild(
             activityList.lastChild
@@ -153,8 +144,7 @@ function generateWallet() {
         result +=
             chars[
                 Math.floor(
-                    Math.random() *
-                    chars.length
+                    Math.random() * chars.length
                 )
             ];
     }
@@ -166,8 +156,7 @@ function generateWallet() {
         result +=
             chars[
                 Math.floor(
-                    Math.random() *
-                    chars.length
+                    Math.random() * chars.length
                 )
             ];
     }
@@ -259,13 +248,11 @@ function finishExperiment() {
 /* LEADERBOARD */
 
 const leaderboardData = [
-
     ["7xK...92F", 37],
     ["A91...K2Q", 31],
     ["4Pm...8Ls", 24],
     ["9Qw...L7A", 19],
     ["3Hd...P2M", 15]
-
 ];
 
 
@@ -295,8 +282,7 @@ function renderLeaderboard() {
             row.style.borderBottom =
                 "1px solid rgba(255,255,255,0.06)";
 
-            row.style.fontSize =
-                "11px";
+            row.style.fontSize = "11px";
 
             row.innerHTML = `
 
@@ -315,7 +301,6 @@ function renderLeaderboard() {
             `;
 
             list.appendChild(row);
-
         }
     );
 }
@@ -407,7 +392,7 @@ walletOverlay.addEventListener(
 );
 
 
-/* MOBILE DETECTION */
+/* DEVICE */
 
 function isMobile() {
 
@@ -441,35 +426,56 @@ function getPhantom() {
 }
 
 
-/* SOLFLARE */
+/*
+    MOBILE PHANTOM REDIRECT
 
-function getSolflare() {
+    Opens UNKNOWN inside Phantom.
+*/
 
-    if (
-        window.solflare &&
-        typeof window.solflare.connect === "function"
-    ) {
+function openInPhantom() {
 
-        return window.solflare;
-    }
+    const currentUrl =
+        window.location.href;
 
-    return null;
-}
+    const encodedUrl =
+        encodeURIComponent(currentUrl);
 
+    const phantomUrl =
+        `https://phantom.app/ul/browse/${encodedUrl}`;
 
-/* BACKPACK */
+    walletStatus.innerHTML = `
+        <button
+            id="openPhantomButton"
+            style="
+                margin-top:8px;
+                width:100%;
+                padding:14px;
+                border:1px solid rgba(155,188,255,0.30);
+                background:rgba(155,188,255,0.06);
+                color:#f2f4f7;
+                font-family:inherit;
+                font-size:10px;
+                letter-spacing:.14em;
+                cursor:pointer;
+            "
+        >
+            OPEN IN PHANTOM
+        </button>
+    `;
 
-function getBackpack() {
+    const button =
+        document.getElementById(
+            "openPhantomButton"
+        );
 
-    if (
-        window.backpack &&
-        window.backpack.solana
-    ) {
+    button.addEventListener(
+        "click",
+        () => {
 
-        return window.backpack.solana;
-    }
-
-    return null;
+            window.location.href =
+                phantomUrl;
+        }
+    );
 }
 
 
@@ -480,18 +486,43 @@ async function connectPhantom() {
     const provider =
         getPhantom();
 
-    if (!provider) {
 
-        if (isMobile()) {
+    /*
+        MOBILE EXTERNAL BROWSER
 
-            walletStatus.textContent =
-                "OPEN THIS SITE INSIDE PHANTOM";
+        No injected Phantom provider means
+        Safari/Chrome is outside Phantom.
+    */
 
-            return;
-        }
+    if (!provider && isMobile()) {
 
         walletStatus.textContent =
-            "PHANTOM EXTENSION NOT FOUND";
+            "OPENING PHANTOM...";
+
+        setTimeout(() => {
+
+            openInPhantom();
+
+        }, 350);
+
+        return;
+    }
+
+
+    /*
+        DESKTOP
+    */
+
+    if (!provider) {
+
+        walletStatus.innerHTML = `
+            PHANTOM EXTENSION NOT FOUND
+            <br><br>
+            <span style="font-size:9px;">
+                Install Phantom and open this site
+                in a supported browser.
+            </span>
+        `;
 
         return;
     }
@@ -558,7 +589,21 @@ async function connectPhantom() {
 }
 
 
-/* SOLFLARE CONNECTION */
+/* SOLFLARE */
+
+function getSolflare() {
+
+    if (
+        window.solflare &&
+        typeof window.solflare.connect === "function"
+    ) {
+
+        return window.solflare;
+    }
+
+    return null;
+}
+
 
 async function connectSolflare() {
 
@@ -637,7 +682,21 @@ async function connectSolflare() {
 }
 
 
-/* BACKPACK CONNECTION */
+/* BACKPACK */
+
+function getBackpack() {
+
+    if (
+        window.backpack &&
+        window.backpack.solana
+    ) {
+
+        return window.backpack.solana;
+    }
+
+    return null;
+}
+
 
 async function connectBackpack() {
 
