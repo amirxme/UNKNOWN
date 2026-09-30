@@ -27,14 +27,19 @@ export default async function handler(req, res) {
         }
 
         const publicKey = bs58.decode(wallet);
-        const signedMessage = new TextEncoder().encode(message);
-        const signedMessageBytes = bs58.decode(signature);
 
-        const valid = nacl.sign.detached.verify(
-            signedMessage,
-            signedMessageBytes,
-            publicKey
-        );
+        const signedMessage =
+            new TextEncoder().encode(message);
+
+        const signatureBytes =
+            Buffer.from(signature, "base64");
+
+        const valid =
+            nacl.sign.detached.verify(
+                signedMessage,
+                signatureBytes,
+                publicKey
+            );
 
         if (!valid) {
             return res.status(401).json({
@@ -42,9 +47,10 @@ export default async function handler(req, res) {
             });
         }
 
-        const alreadyPressed = await redis.get(
-            `unknown:wallet:${wallet}`
-        );
+        const alreadyPressed =
+            await redis.get(
+                `unknown:wallet:${wallet}`
+            );
 
         if (alreadyPressed) {
             return res.status(400).json({
@@ -52,7 +58,8 @@ export default async function handler(req, res) {
             });
         }
 
-        const count = await redis.incr("unknown:count");
+        const count =
+            await redis.incr("unknown:count");
 
         await redis.set(
             `unknown:wallet:${wallet}`,
@@ -66,10 +73,11 @@ export default async function handler(req, res) {
 
     } catch (error) {
 
+        console.error(error);
+
         return res.status(500).json({
             success: false,
             error: error.message
         });
-
     }
 }
