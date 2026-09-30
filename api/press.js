@@ -69,8 +69,7 @@ if (req.method !== "POST") {
             });
         }
 
-        const count =
-            await redis.incr("unknown:count");
+    
 const currentCount =
     Number(await redis.get("unknown:count")) || 0;
 
