@@ -45,7 +45,9 @@ const walletStatus =
 
 /* COUNTER */
 
-function updateCounter() {
+let counterAnimationFrame = null;
+
+function updateCounter(animate = false) {
 
     currentCount.textContent =
         count.toLocaleString("en-US");
