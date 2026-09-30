@@ -868,15 +868,14 @@ if (!isHolder) {
                     "PRESS FAILED";
             }
 
-        } finally {
+        finally {
 
-            pressing = false;
+    pressing = false;
 
-            if (count < TARGET) {
-                pressButton.disabled = false;
-            }
-        }
+    if (count < TARGET) {
+        pressButton.disabled = !isHolder;
     }
+}
 );
 
 
