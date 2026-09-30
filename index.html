@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>UNKNOWN</title>
+
+    <meta
+        name="description"
+        content="Something is waiting."
+    >
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="logo">
+            UNKNOWN
+        </div>
+
+        <div class="header-actions">
+            <button id="leaderboardButton">
+                LEADERBOARD
+            </button>
+
+            <button id="walletButton">
+                CONNECT WALLET
+            </button>
+        </div>
+
+    </header>
+
+
+    <main class="main">
+
+        <div class="experiment">
+
+            <div class="label">
+                UNKNOWN EXPERIMENT
+            </div>
+
+            <h1>UNKNOWN</h1>
+
+            <p class="subtitle">
+                Something is waiting.
+            </p>
+
+
+            <button class="press-button" id="pressButton">
+                <span>PRESS</span>
+            </button>
+
+
+            <div class="counter">
+
+                <div class="numbers">
+                    <span id="currentCount">0</span>
+                    <span class="slash">/</span>
+                    <span>50,000</span>
+                </div>
+
+                <div class="progress">
+                    <div id="progressFill"></div>
+                </div>
+
+            </div>
+
+
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>WAITING</span>
+            </div>
+
+        </div>
+
+
+        <div class="activity">
+
+            <div class="activity-top">
+                <span>LIVE ACTIVITY</span>
+
+                <span class="live">
+                    <span></span>
+                    LIVE
+                </span>
+            </div>
+
+            <div id="activityList">
+
+                <div class="activity-empty">
+                    Waiting for someone...
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <div class="overlay" id="leaderboardOverlay">
+
+        <div class="modal">
+
+            <button
+                class="close"
+                id="closeLeaderboard"
+            >
+                ×
+            </button>
+
+            <div class="modal-label">
+                UNKNOWN
+            </div>
+
+            <h2>LEADERBOARD</h2>
+
+            <p>
+                The people who pressed the most.
+            </p>
+
+            <div id="leaderboardList"></div>
+
+        </div>
+
+    </div>
+
+
+    <div class="overlay" id="walletOverlay">
+
+        <div class="modal">
+
+            <button
+                class="close"
+                id="closeWallet"
+            >
+                ×
+            </button>
+
+            <div class="modal-label">
+                UNKNOWN
+            </div>
+
+            <h2>CONNECT WALLET</h2>
+
+            <p>
+                Solana wallet connection will be available soon.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
