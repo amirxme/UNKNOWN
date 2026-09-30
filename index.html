@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>UNKNOWN</title>
 
@@ -12,7 +18,9 @@
     >
 
     <link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
@@ -23,6 +31,7 @@
         </div>
 
         <div class="header-actions">
+
             <button id="leaderboardButton">
                 LEADERBOARD
             </button>
@@ -30,6 +39,7 @@
             <button id="walletButton">
                 CONNECT WALLET
             </button>
+
         </div>
 
     </header>
@@ -43,14 +53,19 @@
                 UNKNOWN EXPERIMENT
             </div>
 
-            <h1>UNKNOWN</h1>
+            <h1>
+                UNKNOWN
+            </h1>
 
             <p class="subtitle">
                 Something is waiting.
             </p>
 
 
-            <button class="press-button" id="pressButton">
+            <button
+                class="press-button"
+                id="pressButton"
+            >
                 <span>PRESS</span>
             </button>
 
@@ -58,21 +73,39 @@
             <div class="counter">
 
                 <div class="numbers">
-                    <span id="currentCount">0</span>
-                    <span class="slash">/</span>
-                    <span>50,000</span>
+
+                    <span id="currentCount">
+                        0
+                    </span>
+
+                    <span class="slash">
+                        /
+                    </span>
+
+                    <span>
+                        50,000
+                    </span>
+
                 </div>
 
+
                 <div class="progress">
+
                     <div id="progressFill"></div>
+
                 </div>
 
             </div>
 
 
             <div class="status">
+
                 <span class="status-dot"></span>
-                <span>WAITING</span>
+
+                <span id="statusText">
+                    WAITING
+                </span>
+
             </div>
 
         </div>
@@ -81,13 +114,21 @@
         <div class="activity">
 
             <div class="activity-top">
-                <span>LIVE ACTIVITY</span>
+
+                <span>
+                    LIVE ACTIVITY
+                </span>
 
                 <span class="live">
+
                     <span></span>
+
                     LIVE
+
                 </span>
+
             </div>
+
 
             <div id="activityList">
 
@@ -102,7 +143,12 @@
     </main>
 
 
-    <div class="overlay" id="leaderboardOverlay">
+    <!-- LEADERBOARD -->
+
+    <div
+        class="overlay"
+        id="leaderboardOverlay"
+    >
 
         <div class="modal">
 
@@ -117,7 +163,9 @@
                 UNKNOWN
             </div>
 
-            <h2>LEADERBOARD</h2>
+            <h2>
+                LEADERBOARD
+            </h2>
 
             <p>
                 The people who pressed the most.
@@ -130,7 +178,12 @@
     </div>
 
 
-    <div class="overlay" id="walletOverlay">
+    <!-- WALLET -->
+
+    <div
+        class="overlay"
+        id="walletOverlay"
+    >
 
         <div class="modal">
 
@@ -145,11 +198,47 @@
                 UNKNOWN
             </div>
 
-            <h2>CONNECT WALLET</h2>
+            <h2>
+                CONNECT WALLET
+            </h2>
 
             <p>
-                Solana wallet connection will be available soon.
+                Connect your Solana wallet to continue.
             </p>
+
+
+            <div class="wallet-options">
+
+                <button
+                    class="wallet-option"
+                    id="phantomButton"
+                >
+                    PHANTOM
+                </button>
+
+
+                <button
+                    class="wallet-option"
+                    id="solflareButton"
+                >
+                    SOLFLARE
+                </button>
+
+
+                <button
+                    class="wallet-option"
+                    id="backpackButton"
+                >
+                    BACKPACK
+                </button>
+
+            </div>
+
+
+            <div
+                id="walletStatus"
+                class="wallet-status"
+            ></div>
 
         </div>
 
@@ -159,4 +248,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>
