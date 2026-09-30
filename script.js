@@ -2,21 +2,15 @@ const TARGET = 10000;
 
 let count = 0;
 let connectedWallet = null;
-
+let walletProvider = null;
+let pressing = false;
 
 /* ELEMENTS */
 
-const pressButton =
-    document.getElementById("pressButton");
-
-const currentCount =
-    document.getElementById("currentCount");
-
-const progressFill =
-    document.getElementById("progressFill");
-
-const activityList =
-    document.getElementById("activityList");
+const pressButton = document.getElementById("pressButton");
+const currentCount = document.getElementById("currentCount");
+const progressFill = document.getElementById("progressFill");
+const activityList = document.getElementById("activityList");
 
 const leaderboardButton =
     document.getElementById("leaderboardButton");
@@ -57,7 +51,7 @@ function updateCounter() {
         count.toLocaleString("en-US");
 
     const progress =
-        (count / TARGET) * 100;
+        Math.min((count / TARGET) * 100, 100);
 
     progressFill.style.width =
         `${progress}%`;
@@ -75,9 +69,7 @@ function buttonPulse() {
     pressButton.classList.add("pulse");
 
     setTimeout(() => {
-
         pressButton.classList.remove("pulse");
-
     }, 450);
 }
 
@@ -96,12 +88,7 @@ function shortenAddress(address) {
 
 /* ACTIVITY */
 
-function addActivity() {
-
-    const wallet =
-        connectedWallet
-            ? shortenAddress(connectedWallet)
-            : generateWallet();
+function addActivity(wallet) {
 
     const item =
         document.createElement("div");
@@ -110,12 +97,11 @@ function addActivity() {
         "activity-empty";
 
     item.style.opacity = "0";
-
     item.style.transform =
         "translateY(-6px)";
 
     item.textContent =
-        `${wallet} pressed`;
+        `${shortenAddress(wallet)} pressed`;
 
     activityList.prepend(item);
 
@@ -133,7 +119,6 @@ function addActivity() {
     while (
         activityList.children.length > 3
     ) {
-
         activityList.removeChild(
             activityList.lastChild
         );
@@ -141,38 +126,423 @@ function addActivity() {
 }
 
 
-function generateWallet() {
+/* MOBILE */
 
-    const chars =
-        "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789";
+function isMobile() {
 
-    let result = "";
+    return /Android|iPhone|iPad|iPod/i.test(
+        navigator.userAgent
+    );
+}
 
-    for (let i = 0; i < 4; i++) {
 
-        result +=
-            chars[
-                Math.floor(
-                    Math.random() *
-                    chars.length
-                )
-            ];
+/* PHANTOM */
+
+function getPhantom() {
+
+    if (
+        window.phantom &&
+        window.phantom.solana
+    ) {
+        return window.phantom.solana;
     }
 
-    result += "...";
-
-    for (let i = 0; i < 3; i++) {
-
-        result +=
-            chars[
-                Math.floor(
-                    Math.random() *
-                    chars.length
-                )
-            ];
+    if (
+        window.solana &&
+        window.solana.isPhantom
+    ) {
+        return window.solana;
     }
 
-    return result;
+    return null;
+}
+
+
+/* SOLFLARE */
+
+function getSolflare() {
+
+    if (
+        window.solflare &&
+        typeof window.solflare.connect === "function"
+    ) {
+        return window.solflare;
+    }
+
+    return null;
+}
+
+
+/* BACKPACK */
+
+function getBackpack() {
+
+    if (
+        window.backpack &&
+        window.backpack.solana
+    ) {
+        return window.backpack.solana;
+    }
+
+    return null;
+}
+
+
+/* MOBILE REDIRECT */
+
+function showOpenButton(walletName, deeplink) {
+
+    walletStatus.innerHTML = `
+        <div
+            style="
+                margin-bottom:12px;
+                color:#777d88;
+            "
+        >
+            OPEN THIS SITE INSIDE ${walletName}
+        </div>
+
+        <button
+            id="openWalletButton"
+            style="
+                width:100%;
+                padding:14px;
+                border:1px solid rgba(155,188,255,0.30);
+                background:rgba(155,188,255,0.06);
+                color:#f2f4f7;
+                font-family:inherit;
+                font-size:10px;
+                letter-spacing:.14em;
+                cursor:pointer;
+            "
+        >
+            OPEN IN ${walletName}
+        </button>
+    `;
+
+    const openButton =
+        document.getElementById(
+            "openWalletButton"
+        );
+
+    openButton.addEventListener(
+        "click",
+        () => {
+            window.location.href = deeplink;
+        }
+    );
+}
+
+
+/* PHANTOM REDIRECT */
+
+function openPhantom() {
+
+    const currentUrl =
+        window.location.href;
+
+    const encodedUrl =
+        encodeURIComponent(currentUrl);
+
+    const deeplink =
+        `https://phantom.app/ul/browse/${encodedUrl}`;
+
+    showOpenButton(
+        "PHANTOM",
+        deeplink
+    );
+}
+
+
+/* SOLFLARE REDIRECT */
+
+function openSolflare() {
+
+    const currentUrl =
+        window.location.href;
+
+    const encodedUrl =
+        encodeURIComponent(currentUrl);
+
+    const ref =
+        encodeURIComponent(
+            window.location.origin
+        );
+
+    const deeplink =
+        `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=${ref}`;
+
+    showOpenButton(
+        "SOLFLARE",
+        deeplink
+    );
+}
+
+
+/* BACKPACK REDIRECT */
+
+function openBackpack() {
+
+    const currentUrl =
+        window.location.href;
+
+    const encodedUrl =
+        encodeURIComponent(currentUrl);
+
+    const ref =
+        encodeURIComponent(
+            window.location.origin
+        );
+
+    const deeplink =
+        `https://backpack.app/ul/v1/browse/${encodedUrl}?ref=${ref}`;
+
+    showOpenButton(
+        "BACKPACK",
+        deeplink
+    );
+}
+
+
+/* SET CONNECTED WALLET */
+
+function setConnectedWallet(provider, publicKey) {
+
+    walletProvider = provider;
+
+    connectedWallet =
+        publicKey.toString();
+
+    walletStatus.textContent =
+        "CONNECTED · " +
+        shortenAddress(
+            connectedWallet
+        );
+
+    walletButton.textContent =
+        shortenAddress(
+            connectedWallet
+        );
+
+    setTimeout(() => {
+
+        walletOverlay.classList.remove(
+            "active"
+        );
+
+    }, 700);
+}
+
+
+/* PHANTOM CONNECTION */
+
+async function connectPhantom() {
+
+    const provider =
+        getPhantom();
+
+    if (!provider && isMobile()) {
+
+        walletStatus.textContent =
+            "OPENING PHANTOM...";
+
+        setTimeout(() => {
+            openPhantom();
+        }, 300);
+
+        return;
+    }
+
+    if (!provider) {
+
+        walletStatus.innerHTML = `
+            PHANTOM EXTENSION NOT FOUND
+            <br><br>
+            <span style="font-size:9px;">
+                Open UNKNOWN in a supported desktop browser
+                with Phantom installed.
+            </span>
+        `;
+
+        return;
+    }
+
+    try {
+
+        walletStatus.textContent =
+            "CONNECTING...";
+
+        const response =
+            await provider.connect();
+
+        if (
+            !response ||
+            !response.publicKey
+        ) {
+
+            walletStatus.textContent =
+                "WALLET ADDRESS NOT FOUND";
+
+            return;
+        }
+
+        setConnectedWallet(
+            provider,
+            response.publicKey
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Phantom connection error:",
+            error
+        );
+
+        walletStatus.textContent =
+            "CONNECTION CANCELLED";
+    }
+}
+
+
+/* SOLFLARE CONNECTION */
+
+async function connectSolflare() {
+
+    const provider =
+        getSolflare();
+
+    if (!provider && isMobile()) {
+
+        walletStatus.textContent =
+            "OPENING SOLFLARE...";
+
+        setTimeout(() => {
+            openSolflare();
+        }, 300);
+
+        return;
+    }
+
+    if (!provider) {
+
+        walletStatus.textContent =
+            "SOLFLARE NOT FOUND";
+
+        return;
+    }
+
+    try {
+
+        walletStatus.textContent =
+            "CONNECTING...";
+
+        const response =
+            await provider.connect();
+
+        if (
+            !response ||
+            !response.publicKey
+        ) {
+
+            walletStatus.textContent =
+                "WALLET ADDRESS NOT FOUND";
+
+            return;
+        }
+
+        setConnectedWallet(
+            provider,
+            response.publicKey
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Solflare connection error:",
+            error
+        );
+
+        walletStatus.textContent =
+            "CONNECTION CANCELLED";
+    }
+}
+
+
+/* BACKPACK CONNECTION */
+
+async function connectBackpack() {
+
+    const provider =
+        getBackpack();
+
+    if (!provider && isMobile()) {
+
+        walletStatus.textContent =
+            "OPENING BACKPACK...";
+
+        setTimeout(() => {
+            openBackpack();
+        }, 300);
+
+        return;
+    }
+
+    if (!provider) {
+
+        walletStatus.textContent =
+            "BACKPACK NOT FOUND";
+
+        return;
+    }
+
+    try {
+
+        walletStatus.textContent =
+            "CONNECTING...";
+
+        const response =
+            await provider.connect();
+
+        if (
+            !response ||
+            !response.publicKey
+        ) {
+
+            walletStatus.textContent =
+                "WALLET ADDRESS NOT FOUND";
+
+            return;
+        }
+
+        setConnectedWallet(
+            provider,
+            response.publicKey
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Backpack connection error:",
+            error
+        );
+
+        walletStatus.textContent =
+            "CONNECTION CANCELLED";
+    }
+}
+
+
+/* SIGNATURE ENCODING */
+
+function uint8ArrayToBase64(bytes) {
+
+    let binary = "";
+
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+
+    return btoa(binary);
 }
 
 
@@ -180,22 +550,186 @@ function generateWallet() {
 
 pressButton.addEventListener(
     "click",
-    () => {
+    async () => {
+
+        if (pressing) {
+            return;
+        }
 
         if (count >= TARGET) {
             return;
         }
 
-        count++;
+        if (!connectedWallet || !walletProvider) {
 
-        updateCounter();
+            walletOverlay.classList.add(
+                "active"
+            );
 
-        addActivity();
+            walletStatus.textContent =
+                "CONNECT WALLET FIRST";
 
-        buttonPulse();
+            return;
+        }
 
-        if (count === TARGET) {
-            finishExperiment();
+        if (
+            typeof walletProvider.signMessage !==
+            "function"
+        ) {
+
+            walletStatus.textContent =
+                "SIGN MESSAGE NOT SUPPORTED";
+
+            return;
+        }
+
+        try {
+
+            pressing = true;
+
+            pressButton.disabled = true;
+
+            walletStatus.textContent =
+                "SIGN TO PRESS...";
+
+            /*
+             * Unique message for this wallet.
+             * The server verifies that the wallet
+             * actually signed this message.
+             */
+
+            const message =
+                `UNKNOWN PRESS\nWallet: ${connectedWallet}\nTime: ${Date.now()}`;
+
+            const encodedMessage =
+                new TextEncoder().encode(
+                    message
+                );
+
+            const signed =
+                await walletProvider.signMessage(
+                    encodedMessage,
+                    "utf8"
+                );
+
+            if (
+                !signed ||
+                !signed.signature
+            ) {
+
+                throw new Error(
+                    "Wallet did not return a signature"
+                );
+            }
+
+            const signature =
+                uint8ArrayToBase64(
+                    signed.signature
+                );
+
+            const response =
+                await fetch(
+                    "/api/press",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            wallet:
+                                connectedWallet,
+
+                            message:
+                                message,
+
+                            signature:
+                                signature
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+
+                if (
+                    data.error ===
+                    "This wallet already pressed"
+                ) {
+
+                    walletStatus.textContent =
+                        "THIS WALLET ALREADY PRESSED";
+
+                } else {
+
+                    walletStatus.textContent =
+                        data.error ||
+                        "PRESS FAILED";
+                }
+
+                return;
+            }
+
+            if (
+                !data.success ||
+                typeof data.count !== "number"
+            ) {
+
+                throw new Error(
+                    "Invalid server response"
+                );
+            }
+
+            count =
+                data.count;
+
+            updateCounter();
+
+            addActivity(
+                connectedWallet
+            );
+
+            buttonPulse();
+
+            walletStatus.textContent =
+                "PRESS REGISTERED";
+
+            if (count >= TARGET) {
+                finishExperiment();
+            }
+
+        } catch (error) {
+
+            console.error(
+                "PRESS error:",
+                error
+            );
+
+            if (
+                error &&
+                error.code === 4001
+            ) {
+
+                walletStatus.textContent =
+                    "SIGNATURE CANCELLED";
+
+            } else {
+
+                walletStatus.textContent =
+                    "PRESS FAILED";
+            }
+
+        } finally {
+
+            pressing = false;
+
+            if (count < TARGET) {
+                pressButton.disabled = false;
+            }
         }
     }
 );
@@ -210,7 +744,6 @@ function finishExperiment() {
     setTimeout(() => {
 
         document.body.innerHTML = `
-
             <main
                 style="
                     min-height:100vh;
@@ -249,7 +782,6 @@ function finishExperiment() {
                 </div>
 
             </main>
-
         `;
 
     }, 2500);
@@ -259,13 +791,11 @@ function finishExperiment() {
 /* LEADERBOARD */
 
 const leaderboardData = [
-
     ["7xK...92F", 37],
     ["A91...K2Q", 31],
     ["4Pm...8Ls", 24],
     ["9Qw...L7A", 19],
     ["3Hd...P2M", 15]
-
 ];
 
 
@@ -299,7 +829,6 @@ function renderLeaderboard() {
                 "11px";
 
             row.innerHTML = `
-
                 <span style="color:#555b65">
                     ${String(index + 1).padStart(2, "0")}
                 </span>
@@ -311,11 +840,9 @@ function renderLeaderboard() {
                 <span style="text-align:right">
                     ${entry[1]}
                 </span>
-
             `;
 
             list.appendChild(row);
-
         }
     );
 }
@@ -407,484 +934,6 @@ walletOverlay.addEventListener(
 );
 
 
-/* MOBILE */
-
-function isMobile() {
-
-    return /Android|iPhone|iPad|iPod/i.test(
-        navigator.userAgent
-    );
-}
-
-
-/* PHANTOM */
-
-function getPhantom() {
-
-    if (
-        window.phantom &&
-        window.phantom.solana
-    ) {
-
-        return window.phantom.solana;
-    }
-
-    if (
-        window.solana &&
-        window.solana.isPhantom
-    ) {
-
-        return window.solana;
-    }
-
-    return null;
-}
-
-
-/* SOLFLARE */
-
-function getSolflare() {
-
-    if (
-        window.solflare &&
-        typeof window.solflare.connect === "function"
-    ) {
-
-        return window.solflare;
-    }
-
-    return null;
-}
-
-
-/* BACKPACK */
-
-function getBackpack() {
-
-    if (
-        window.backpack &&
-        window.backpack.solana
-    ) {
-
-        return window.backpack.solana;
-    }
-
-    return null;
-}
-
-
-/* MOBILE REDIRECT BUTTON */
-
-function showOpenButton(
-    walletName,
-    deeplink
-) {
-
-    walletStatus.innerHTML = `
-        <div
-            style="
-                margin-bottom:12px;
-                color:#777d88;
-            "
-        >
-            OPEN THIS SITE INSIDE ${walletName}
-        </div>
-
-        <button
-            id="openWalletButton"
-            style="
-                width:100%;
-                padding:14px;
-                border:1px solid rgba(155,188,255,0.30);
-                background:rgba(155,188,255,0.06);
-                color:#f2f4f7;
-                font-family:inherit;
-                font-size:10px;
-                letter-spacing:.14em;
-                cursor:pointer;
-            "
-        >
-            OPEN IN ${walletName}
-        </button>
-    `;
-
-    const openButton =
-        document.getElementById(
-            "openWalletButton"
-        );
-
-    openButton.addEventListener(
-        "click",
-        () => {
-
-            window.location.href =
-                deeplink;
-        }
-    );
-}
-
-
-/* PHANTOM REDIRECT */
-
-function openPhantom() {
-
-    const currentUrl =
-        window.location.href;
-
-    const encodedUrl =
-        encodeURIComponent(
-            currentUrl
-        );
-
-    const deeplink =
-        `https://phantom.app/ul/browse/${encodedUrl}`;
-
-    showOpenButton(
-        "PHANTOM",
-        deeplink
-    );
-}
-
-
-/* SOLFLARE REDIRECT */
-
-function openSolflare() {
-
-    const currentUrl =
-        window.location.href;
-
-    const encodedUrl =
-        encodeURIComponent(
-            currentUrl
-        );
-
-    const ref =
-        encodeURIComponent(
-            window.location.origin
-        );
-
-    const deeplink =
-        `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=${ref}`;
-
-    showOpenButton(
-        "SOLFLARE",
-        deeplink
-    );
-}
-
-
-/* BACKPACK REDIRECT */
-
-function openBackpack() {
-
-    const currentUrl =
-        window.location.href;
-
-    const encodedUrl =
-        encodeURIComponent(
-            currentUrl
-        );
-
-    const ref =
-        encodeURIComponent(
-            window.location.origin
-        );
-
-    const deeplink =
-        `https://backpack.app/ul/v1/browse/${encodedUrl}?ref=${ref}`;
-
-    showOpenButton(
-        "BACKPACK",
-        deeplink
-    );
-}
-
-
-/* PHANTOM CONNECTION */
-
-async function connectPhantom() {
-
-    const provider =
-        getPhantom();
-
-
-    if (!provider && isMobile()) {
-
-        walletStatus.textContent =
-            "OPENING PHANTOM...";
-
-        setTimeout(() => {
-
-            openPhantom();
-
-        }, 300);
-
-        return;
-    }
-
-
-    if (!provider) {
-
-        walletStatus.innerHTML = `
-            PHANTOM EXTENSION NOT FOUND
-            <br><br>
-            <span style="font-size:9px;">
-                Open UNKNOWN in a supported desktop browser
-                with Phantom installed.
-            </span>
-        `;
-
-        return;
-    }
-
-
-    try {
-
-        walletStatus.textContent =
-            "CONNECTING...";
-
-
-        const response =
-            await provider.connect();
-
-
-        if (
-            !response ||
-            !response.publicKey
-        ) {
-
-            walletStatus.textContent =
-                "WALLET ADDRESS NOT FOUND";
-
-            return;
-        }
-
-
-        connectedWallet =
-            response.publicKey.toString();
-
-
-        walletStatus.textContent =
-            "CONNECTED · " +
-            shortenAddress(
-                connectedWallet
-            );
-
-
-        walletButton.textContent =
-            shortenAddress(
-                connectedWallet
-            );
-
-
-        setTimeout(() => {
-
-            walletOverlay.classList.remove(
-                "active"
-            );
-
-        }, 800);
-
-
-    } catch (error) {
-
-        console.error(
-            "Phantom connection error:",
-            error
-        );
-
-        walletStatus.textContent =
-            "CONNECTION CANCELLED";
-    }
-}
-
-
-/* SOLFLARE CONNECTION */
-
-async function connectSolflare() {
-
-    const provider =
-        getSolflare();
-
-
-    if (!provider && isMobile()) {
-
-        walletStatus.textContent =
-            "OPENING SOLFLARE...";
-
-        setTimeout(() => {
-
-            openSolflare();
-
-        }, 300);
-
-        return;
-    }
-
-
-    if (!provider) {
-
-        walletStatus.textContent =
-            "SOLFLARE NOT FOUND";
-
-        return;
-    }
-
-
-    try {
-
-        walletStatus.textContent =
-            "CONNECTING...";
-
-
-        const response =
-            await provider.connect();
-
-
-        if (
-            !response ||
-            !response.publicKey
-        ) {
-
-            walletStatus.textContent =
-                "WALLET ADDRESS NOT FOUND";
-
-            return;
-        }
-
-
-        connectedWallet =
-            response.publicKey.toString();
-
-
-        walletStatus.textContent =
-            "CONNECTED · " +
-            shortenAddress(
-                connectedWallet
-            );
-
-
-        walletButton.textContent =
-            shortenAddress(
-                connectedWallet
-            );
-
-
-        setTimeout(() => {
-
-            walletOverlay.classList.remove(
-                "active"
-            );
-
-        }, 800);
-
-
-    } catch (error) {
-
-        console.error(
-            "Solflare connection error:",
-            error
-        );
-
-        walletStatus.textContent =
-            "CONNECTION CANCELLED";
-    }
-}
-
-
-/* BACKPACK CONNECTION */
-
-async function connectBackpack() {
-
-    const provider =
-        getBackpack();
-
-
-    if (!provider && isMobile()) {
-
-        walletStatus.textContent =
-            "OPENING BACKPACK...";
-
-        setTimeout(() => {
-
-            openBackpack();
-
-        }, 300);
-
-        return;
-    }
-
-
-    if (!provider) {
-
-        walletStatus.textContent =
-            "BACKPACK NOT FOUND";
-
-        return;
-    }
-
-
-    try {
-
-        walletStatus.textContent =
-            "CONNECTING...";
-
-
-        const response =
-            await provider.connect();
-
-
-        if (
-            !response ||
-            !response.publicKey
-        ) {
-
-            walletStatus.textContent =
-                "WALLET ADDRESS NOT FOUND";
-
-            return;
-        }
-
-
-        connectedWallet =
-            response.publicKey.toString();
-
-
-        walletStatus.textContent =
-            "CONNECTED · " +
-            shortenAddress(
-                connectedWallet
-            );
-
-
-        walletButton.textContent =
-            shortenAddress(
-                connectedWallet
-            );
-
-
-        setTimeout(() => {
-
-            walletOverlay.classList.remove(
-                "active"
-            );
-
-        }, 800);
-
-
-    } catch (error) {
-
-        console.error(
-            "Backpack connection error:",
-            error
-        );
-
-        walletStatus.textContent =
-            "CONNECTION CANCELLED";
-    }
-}
-
-
 /* BUTTONS */
 
 phantomButton.addEventListener(
@@ -892,12 +941,10 @@ phantomButton.addEventListener(
     connectPhantom
 );
 
-
 solflareButton.addEventListener(
     "click",
     connectSolflare
 );
-
 
 backpackButton.addEventListener(
     "click",
