@@ -2,6 +2,7 @@ const TARGET = 10000;
 
 let count = 0;
 let connectedWallet = null;
+let isHolder = false;
 let walletProvider = null;
 let pressing = false;
 
