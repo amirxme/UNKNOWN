@@ -412,7 +412,62 @@ function setConnectedWallet(provider, publicKey) {
 
     }, 700);
 }
+async function verifyHolder() {
 
+    if (!connectedWallet) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch("/api/holders", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    wallet: connectedWallet
+                })
+            });
+
+        const data =
+            await response.json();
+
+        isHolder =
+            data.success === true &&
+            data.holder === true;
+
+        if (isHolder) {
+
+            walletStatus.textContent =
+                "HOLDER VERIFIED";
+
+            pressButton.disabled = false;
+
+        } else {
+
+            walletStatus.textContent =
+                "HOLDER ACCESS REQUIRED";
+
+            pressButton.disabled = true;
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Holder verification error:",
+            error
+        );
+
+        isHolder = false;
+
+        pressButton.disabled = true;
+
+        walletStatus.textContent =
+            "HOLDER CHECK FAILED";
+    }
+}
 
 /* PHANTOM CONNECTION */
 
