@@ -390,16 +390,19 @@ function setConnectedWallet(provider, publicKey) {
     connectedWallet =
         publicKey.toString();
 
+    isHolder = false;
+
     walletStatus.textContent =
-        "CONNECTED · " +
-        shortenAddress(
-            connectedWallet
-        );
+        "CHECKING HOLDER STATUS...";
 
     walletButton.textContent =
         shortenAddress(
             connectedWallet
         );
+
+    pressButton.disabled = true;
+
+    verifyHolder();
 
     setTimeout(() => {
 
