@@ -109,6 +109,21 @@ if (Number(result) === -2) {
 
 const count = Number(result);
 
+        await redis.lpush(
+            "unknown:activity",
+            JSON.stringify({
+                wallet,
+                count,
+                timestamp: Date.now()
+            })
+        );
+
+        await redis.ltrim(
+            "unknown:activity",
+            0,
+            2
+        );
+
         return res.status(200).json({
             success: true,
             count
