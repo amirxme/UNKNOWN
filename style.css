@@ -100,7 +100,7 @@ body::after {
 }
 
 
-/* SUBTLE BACKGROUND GRID */
+/* BACKGROUND GRID */
 
 body::before {
     content: "";
@@ -148,7 +148,8 @@ body::before {
     align-items: center;
     justify-content: space-between;
 
-    border-bottom: 1px solid var(--line);
+    border-bottom:
+        1px solid var(--line);
 }
 
 .logo {
@@ -164,9 +165,11 @@ body::before {
 }
 
 .header-actions button {
-    border: 1px solid var(--line);
+    border:
+        1px solid var(--line);
 
-    background: rgba(255,255,255,0.025);
+    background:
+        rgba(255,255,255,0.025);
 
     color: var(--text);
 
@@ -186,7 +189,8 @@ body::before {
 }
 
 .header-actions button:hover {
-    background: rgba(255,255,255,0.06);
+    background:
+        rgba(255,255,255,0.06);
 
     border-color:
         rgba(255,255,255,0.18);
@@ -360,6 +364,47 @@ h1 {
 }
 
 
+/* BUTTON PULSE */
+
+.press-button.pulse {
+    animation:
+        pressPulse 0.45s ease-out;
+}
+
+@keyframes pressPulse {
+
+    0% {
+        transform: scale(1);
+
+        box-shadow:
+            0 0 0 0
+            rgba(155,188,255,0.35),
+            0 20px 70px
+            rgba(0,0,0,0.45);
+    }
+
+    35% {
+        transform: scale(0.94);
+
+        box-shadow:
+            0 0 0 18px
+            rgba(155,188,255,0.08),
+            0 0 55px
+            rgba(100,145,220,0.25);
+    }
+
+    100% {
+        transform: scale(1);
+
+        box-shadow:
+            0 0 0 35px
+            rgba(155,188,255,0),
+            0 20px 70px
+            rgba(0,0,0,0.45);
+    }
+}
+
+
 /* COUNTER */
 
 .counter {
@@ -400,7 +445,8 @@ h1 {
 
     height: 100%;
 
-    background: var(--accent);
+    background:
+        var(--accent);
 
     box-shadow:
         0 0 12px
@@ -435,7 +481,8 @@ h1 {
 
     border-radius: 50%;
 
-    background: var(--accent);
+    background:
+        var(--accent);
 
     box-shadow:
         0 0 8px
@@ -500,7 +547,8 @@ h1 {
 
     border-radius: 50%;
 
-    background: var(--accent);
+    background:
+        var(--accent);
 
     box-shadow:
         0 0 8px
@@ -548,7 +596,7 @@ h1 {
     position: relative;
 
     width:
-        min(500px, 100%);
+        min(500px,100%);
 
     padding: 42px;
 
@@ -556,7 +604,8 @@ h1 {
         1px solid
         var(--line);
 
-    background: #0b0d11;
+    background:
+        #0b0d11;
 
     box-shadow:
         0 30px 100px
@@ -604,6 +653,68 @@ h1 {
     color: var(--muted);
 
     font-size: 12px;
+}
+
+
+/* WALLET */
+
+.wallet-options {
+    margin-top: 25px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.wallet-option {
+    width: 100%;
+
+    padding: 14px;
+
+    border:
+        1px solid
+        var(--line);
+
+    background:
+        rgba(255,255,255,0.025);
+
+    color: var(--text);
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    letter-spacing: 0.15em;
+
+    cursor: pointer;
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.wallet-option:hover {
+    background:
+        rgba(255,255,255,0.06);
+
+    border-color:
+        rgba(155,188,255,0.30);
+}
+
+.wallet-status {
+    margin-top: 18px;
+
+    min-height: 14px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    letter-spacing: 0.08em;
+
+    text-align: center;
 }
 
 
@@ -657,4 +768,5 @@ h1 {
         padding:
             30px 24px;
     }
+
 }
